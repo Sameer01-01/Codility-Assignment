@@ -1,0 +1,29 @@
+{
+  "name": "distributed-job-scheduler",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "database",
+    "backend/api",
+    "backend/worker",
+    "frontend"
+  ],
+  "scripts": {
+    "db:generate": "npm run generate -w database",
+    "db:migrate": "npm run migrate -w database",
+    "build": "npm run build --workspaces --if-present",
+    "dev:api": "npm run dev -w backend/api",
+    "dev:worker": "npm run dev -w backend/worker",
+    "dev:frontend": "npm run dev -w frontend",
+    "test": "npm run test --workspaces",
+    "seed": "npm run seed -w database"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "@types/supertest": "^7.2.0",
+    "supertest": "^7.2.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.9"
+  }
+}
