@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../store/index.js';
 import { apiClient } from '../api/client.js';
-import { ShieldAlert, Play, RefreshCw, Terminal, ChevronRight, Eye, Loader2 } from 'lucide-react';
+import { ShieldAlert, Play, RefreshCw, Terminal, ChevronRight, Eye, Loader2, Info, CheckCircle2 } from 'lucide-react';
 
 interface DeadLetter {
   id: string;
@@ -73,7 +73,15 @@ export const DeadLetterQueue: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-extrabold text-white font-montserrat tracking-tight">Dead Letter Queue</h1>
-          <p className="text-gray-400 mt-1">Triaging exhausted job tasks and retrying transaction pipelines</p>
+          <p className="text-gray-400 mt-1 flex items-center gap-1">
+            Jobs that exhausted all retry attempts end up here for manual triage
+            <span className="relative group/tip inline-flex ml-1 cursor-help">
+              <Info className="w-3.5 h-3.5 text-gray-600 hover:text-brandPrimary transition-colors" />
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 border border-gray-700 text-xs text-gray-300 rounded-lg shadow-xl whitespace-normal w-56 text-center opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all z-50 pointer-events-none">
+                When a job fails more times than its max retry count, it is moved to the Dead Letter Queue instead of being discarded. You can inspect the failure reason and retry it manually.
+              </span>
+            </span>
+          </p>
         </div>
         <button
           onClick={fetchDLQ}
@@ -89,10 +97,11 @@ export const DeadLetterQueue: React.FC = () => {
           <p>Fetching dead letter items...</p>
         </div>
       ) : entries.length === 0 ? (
-        <div className="glass p-16 rounded-2xl text-center text-gray-400 border border-gray-800">
-          <ShieldAlert className="w-16 h-16 mx-auto mb-4 text-emerald-500 stroke-[1.5]" />
-          <h3 className="text-xl font-bold text-white mb-2">Dead Letter Queue is empty</h3>
-          <p>Excellent! All scheduled and retried tasks are processing normally without exhaustion.</p>
+        <div className="glass p-16 rounded-2xl text-center border border-gray-800">
+          <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-emerald-500 stroke-[1.5]" />
+          <h3 className="text-xl font-bold text-white mb-2">All Jobs Healthy!</h3>
+          <p className="text-gray-400 mb-2">The Dead Letter Queue is empty — no jobs have exhausted their retry attempts.</p>
+          <p className="text-xs text-gray-500">If a job fails more times than allowed, it will appear here so you can inspect the error and retry it.</p>
         </div>
       ) : (
         <div className="glass rounded-2xl border border-gray-800 overflow-hidden">

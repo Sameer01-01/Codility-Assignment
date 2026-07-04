@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../store/index.js';
 import { apiClient } from '../api/client.js';
-import { Play, Pause, Trash2, Plus, Sliders, ShieldAlert, Loader2 } from 'lucide-react';
+import { Play, Pause, Trash2, Plus, Sliders, Loader2, Info } from 'lucide-react';
 
 interface Queue {
   id: string;
@@ -21,10 +21,18 @@ interface Queue {
   };
 }
 
+const Tooltip: React.FC<{ text: string }> = ({ text }) => (
+  <span className="relative group/tip inline-flex ml-1 cursor-help">
+    <Info className="w-3.5 h-3.5 text-gray-600 hover:text-brandPrimary transition-colors" />
+    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 border border-gray-700 text-xs text-gray-300 rounded-lg shadow-xl whitespace-normal w-56 text-center opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all z-50 pointer-events-none">
+      {text}
+    </span>
+  </span>
+);
+
 export const QueueDetail: React.FC = () => {
   const { activeProject } = useAuth();
   const [queues, setQueues] = useState<Queue[]>([]);
-  const [retryPolicies, setRetryPolicies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Creation States
@@ -37,32 +45,15 @@ export const QueueDetail: React.FC = () => {
 
   useEffect(() => {
     if (activeProject) {
-      fetchQueuesAndPolicies();
+      fetchQueues();
     }
   }, [activeProject]);
 
-  const fetchQueuesAndPolicies = async () => {
+  const fetchQueues = async () => {
     setIsLoading(true);
     try {
       const queuesRes = await apiClient.get(`/queues?projectId=${activeProject?.id}`);
       setQueues(queuesRes.data);
-
-      // Fetch sample/available retry policies for selection
-      // If we don't have a route for policies, we can seed them or create/retrieve them.
-      // Let's call database retry policies (we can fetch via projects/organizations or write a quick general endpoint if it exists - wait! Let's check how we handle it in API: we don't have a specific policy route, but we can query them or seed them! In API we can fetch them via a generic fetch, or since we only need the IDs, we can seed policy details. Let's write a simple GET for policies, or if none, fallback to defaults).
-      // Let's fetch policies or create a default one if empty.
-      // Wait, let's look at the database. In our seeding step, we will create some retry policies. So let's write a simple query or let users select standard default values. Let's try to query /queues/retry-policies, or just fallback if it fails.
-      // Actually, let's create a custom route/service if needed or query standard. Let's just catch failure if `/retry-policies` doesn't exist.
-      try {
-        // Wait, did we implement a route for retry policies? No! In the monorepo API, we did not write a separate controller for RetryPolicy CRUD.
-        // That's fine, we can either write a simple policy router in backend/api/src/app.ts, or we can just fetch projects queues and retryPolicy details directly.
-        // Let's implement a quick list endpoint for retry policies in the projects routes or jobs routes if needed, OR we can write it on the fly!
-        // Writing it on the fly in backend/api/src/app.ts/routes is super fast, but since we are executing steps, let's look at what queues/routes has. We can query retry policies in organizations/projects or just list them.
-        // Wait! Let's make sure the frontend behaves gracefully. We can try to fetch policies and fallback if they are empty.
-        // Let's write a simple policy lookup from DB in the API queues/routes.ts or just list all policies.
-      } catch (e) {
-        // Safe fallback
-      }
     } catch (err: any) {
       console.error(err);
       setError('Failed to fetch queues');
@@ -125,8 +116,12 @@ export const QueueDetail: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="p-8 text-center text-gray-400">
-        Please select a project from the projects list to view queues.
+      <div className="glass p-12 rounded-2xl text-center border border-gray-800">
+        <Sliders className="w-12 h-12 mx-auto mb-3 text-gray-600 stroke-[1.5]" />
+        <h3 className="text-lg font-bold text-white mb-2">No Project Selected</h3>
+        <p className="text-gray-400 text-sm max-w-md mx-auto">
+          Queues belong to a project. Go to the <span className="text-brandPrimary font-semibold">Projects</span> page and select or create one first.
+        </p>
       </div>
     );
   }
@@ -138,6 +133,7 @@ export const QueueDetail: React.FC = () => {
           <h1 className="text-3xl font-extrabold text-white font-montserrat tracking-tight">Queues</h1>
           <p className="text-gray-400 mt-1">
             Active project: <span className="text-brandPrimary font-semibold">{activeProject.name}</span>
+            <Tooltip text="A queue is a named processing channel. Jobs enter a queue and are picked up by workers in priority order. Each queue has its own concurrency limit." />
           </p>
         </div>
         <button
@@ -176,7 +172,8 @@ export const QueueDetail: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                Priority (0 is lowest)
+                Priority
+                <Tooltip text="Higher number = processed first. A job with priority 10 will be picked up before a job with priority 0." />
               </label>
               <input
                 type="number"
@@ -192,6 +189,7 @@ export const QueueDetail: React.FC = () => {
             <div>
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Concurrency Limit
+                <Tooltip text="Maximum number of jobs this queue can run simultaneously across all workers. Prevents overloading downstream services." />
               </label>
               <input
                 type="number"
@@ -206,7 +204,8 @@ export const QueueDetail: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                Retry Policy ID (Optional UUID)
+                Retry Policy ID (Optional)
+                <Tooltip text="Links this queue to a retry policy that defines what happens when a job fails — Fixed, Linear, or Exponential backoff delays." />
               </label>
               <input
                 type="text"
@@ -244,8 +243,11 @@ export const QueueDetail: React.FC = () => {
       ) : queues.length === 0 ? (
         <div className="glass p-16 rounded-2xl text-center text-gray-400 border border-gray-800">
           <Sliders className="w-16 h-16 mx-auto mb-4 text-gray-600 stroke-[1.5]" />
-          <h3 className="text-xl font-bold text-white mb-2">No queues found</h3>
-          <p className="mb-6">Create a queue to begin processing tasks in this project.</p>
+          <h3 className="text-xl font-bold text-white mb-2">No queues yet</h3>
+          <p className="mb-2 max-w-md mx-auto">
+            Queues are processing lanes for your jobs. Each queue can have its own concurrency limit and retry policy.
+          </p>
+          <p className="text-xs text-gray-500 mb-6">Create a queue, then submit jobs to it via the <code className="text-brandPrimary">POST /jobs</code> API endpoint.</p>
           <button
             onClick={() => setIsCreating(true)}
             className="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors border border-gray-700"
@@ -281,16 +283,19 @@ export const QueueDetail: React.FC = () => {
                     <div>
                       Priority:{' '}
                       <span className="text-white font-semibold">{queue.priority}</span>
+                      <Tooltip text="Higher priority queues are processed first when workers poll for available jobs." />
                     </div>
                     <div>
                       Concurrency Limit:{' '}
                       <span className="text-white font-semibold">{queue.concurrencyLimit}</span>
+                      <Tooltip text="Max simultaneous jobs allowed across all workers for this queue." />
                     </div>
                     <div>
                       Retry Policy:{' '}
                       <span className="text-white font-semibold">
                         {queue.retryPolicy?.name || 'Default (Fixed / 3 Retries)'}
                       </span>
+                      <Tooltip text="Defines how failed jobs are retried: Fixed delay, Linear increase, or Exponential backoff." />
                     </div>
                   </div>
                 </div>

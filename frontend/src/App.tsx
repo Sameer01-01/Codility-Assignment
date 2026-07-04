@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate, useLocation 
 import { AuthProvider, useAuth } from './store/index.js';
 import { Login } from './pages/Login.js';
 import { Signup } from './pages/Signup.js';
+import { Dashboard } from './pages/Dashboard.js';
 import { Projects } from './pages/Projects.js';
 import { QueueDetail } from './pages/QueueDetail.js';
 import { JobExplorer } from './pages/JobExplorer.js';
@@ -19,8 +20,7 @@ import {
   LogOut,
   User,
   Activity,
-  Menu,
-  X
+  LayoutDashboard
 } from 'lucide-react';
 
 const SidebarLink: React.FC<{ to: string; label: string; icon: React.ReactNode }> = ({ to, label, icon }) => {
@@ -60,7 +60,7 @@ const ProtectedLayout: React.FC = () => {
             <div className="w-8 h-8 bg-gradient-to-tr from-brandPrimary to-brandSecondary rounded-lg flex items-center justify-center shadow shadow-brandPrimary/30">
               <Activity className="w-4.5 h-4.5 text-white" />
             </div>
-            <span className="font-montserrat font-bold text-white tracking-wider text-base">ANTIGRAVITY</span>
+            <span className="font-montserrat font-bold text-white tracking-wider text-base">JobScheduler</span>
           </div>
 
           {/* Org & Project selector */}
@@ -79,6 +79,7 @@ const ProtectedLayout: React.FC = () => {
 
           {/* Navigation links */}
           <nav className="flex flex-col gap-1.5">
+            <SidebarLink to="/dashboard" label="Dashboard" icon={<LayoutDashboard className="w-4.5 h-4.5" />} />
             <SidebarLink to="/projects" label="Projects" icon={<Folder className="w-4.5 h-4.5" />} />
             <SidebarLink to="/queues" label="Queues" icon={<Sliders className="w-4.5 h-4.5" />} />
             <SidebarLink to="/jobs" label="Job Explorer" icon={<Calendar className="w-4.5 h-4.5" />} />
@@ -115,14 +116,15 @@ const ProtectedLayout: React.FC = () => {
       {/* Main container */}
       <main className="flex-1 min-w-0 p-6 md:p-8 overflow-y-auto">
         <Routes>
-          <Route path="/" element={<Navigate to="/projects" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/queues" element={<QueueDetail />} />
           <Route path="/jobs" element={<JobExplorer />} />
           <Route path="/workers" element={<Workers />} />
           <Route path="/dead-letter" element={<DeadLetterQueue />} />
           <Route path="/metrics" element={<Metrics />} />
-          <Route path="*" element={<Navigate to="/projects" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </main>
     </div>

@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../api/client.js';
 import { connectSocket } from '../api/socket.js';
-import { Cpu, Server, HardDrive, RefreshCw, Loader2, HelpCircle } from 'lucide-react';
+import { Cpu, Server, HardDrive, RefreshCw, Loader2, Info } from 'lucide-react';
+
+const Tooltip: React.FC<{ text: string }> = ({ text }) => (
+  <span className="relative group/tip inline-flex ml-1 cursor-help">
+    <Info className="w-3.5 h-3.5 text-gray-600 hover:text-brandPrimary transition-colors" />
+    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 border border-gray-700 text-xs text-gray-300 rounded-lg shadow-xl whitespace-normal w-56 text-center opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all z-50 pointer-events-none">
+      {text}
+    </span>
+  </span>
+);
 
 interface Heartbeat {
   id: string;
@@ -120,8 +129,9 @@ export const Workers: React.FC = () => {
       ) : workers.length === 0 ? (
         <div className="glass p-16 rounded-2xl text-center text-gray-400 border border-gray-800">
           <Server className="w-16 h-16 mx-auto mb-4 text-gray-600 stroke-[1.5]" />
-          <h3 className="text-xl font-bold text-white mb-2">No workers registered</h3>
-          <p>Launch worker processes from the CLI / Docker Compose to scale processing nodes.</p>
+          <h3 className="text-xl font-bold text-white mb-2">No workers online</h3>
+          <p className="mb-2 max-w-md mx-auto">Workers are background processes that pick up and execute jobs from your queues.</p>
+          <p className="text-xs text-gray-500 mb-4">Start one with <code className="text-brandPrimary">docker compose up worker</code> or <code className="text-brandPrimary">npm run dev:worker</code></p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -164,14 +174,20 @@ export const Workers: React.FC = () => {
                   {/* Core Metrics */}
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="block text-xs text-gray-500 uppercase font-semibold">Active Threads</span>
+                      <span className="block text-xs text-gray-500 uppercase font-semibold">
+                        Active Threads
+                        <Tooltip text="Number of jobs this worker is currently executing in parallel right now." />
+                      </span>
                       <span className="text-white font-medium flex items-center gap-1.5 mt-1">
                         <Cpu className="w-4 h-4 text-gray-400" />
                         {worker.heartbeats?.[0]?.currentLoad || 0} tasks
                       </span>
                     </div>
                     <div>
-                      <span className="block text-xs text-gray-500 uppercase font-semibold">Last Contact</span>
+                      <span className="block text-xs text-gray-500 uppercase font-semibold">
+                        Last Heartbeat
+                        <Tooltip text="Workers send a periodic heartbeat signal to prove they're alive. If missed, the reaper marks them offline." />
+                      </span>
                       <span className="text-white font-medium flex items-center gap-1.5 mt-1">
                         <HardDrive className="w-4 h-4 text-gray-400" />
                         {isOffline ? 'Never' : new Date(worker.lastHeartbeatAt).toLocaleTimeString()}
@@ -183,7 +199,10 @@ export const Workers: React.FC = () => {
                   {!isOffline && (
                     <div className="space-y-1.5 pt-2">
                       <div className="flex justify-between text-xs text-gray-400">
-                        <span>Current Load Capacity</span>
+                        <span>
+                          Load Capacity
+                          <Tooltip text="Percentage of this worker's job slots currently in use. Higher load = more concurrent tasks being processed." />
+                        </span>
                         <span>{loadPercent}%</span>
                       </div>
                       <div className="w-full bg-gray-900 rounded-full h-2">

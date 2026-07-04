@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../store/index.js';
 import { apiClient } from '../api/client.js';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
-import { Loader2, RefreshCw, Activity, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
+import { Loader2, RefreshCw, Activity, CheckCircle2, XCircle, Clock, Info } from 'lucide-react';
+
+const InfoTip: React.FC<{ text: string }> = ({ text }) => (
+  <span className="relative group/tip inline-flex ml-1 cursor-help">
+    <Info className="w-3.5 h-3.5 text-gray-600 hover:text-brandPrimary transition-colors" />
+    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 border border-gray-700 text-xs text-gray-300 rounded-lg shadow-xl whitespace-normal w-56 text-center opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all z-50 pointer-events-none">
+      {text}
+    </span>
+  </span>
+);
 
 interface QueueStats {
   queueName: string;
@@ -152,7 +161,7 @@ export const Metrics: React.FC = () => {
           {/* Key Stat Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="glass p-6 rounded-2xl border border-gray-800 space-y-2">
-              <span className="text-xs text-gray-500 uppercase font-semibold">Total Job Instances</span>
+              <span className="text-xs text-gray-500 uppercase font-semibold">Total Job Instances<InfoTip text="Total number of job records across all queues in this project, regardless of status." /></span>
               <div className="text-3xl font-extrabold text-white font-montserrat">{totalJobs}</div>
             </div>
 
@@ -175,7 +184,7 @@ export const Metrics: React.FC = () => {
             </div>
 
             <div className="glass p-6 rounded-2xl border border-gray-800 space-y-2">
-              <span className="text-xs text-gray-500 uppercase font-semibold">Execution Accuracy Rate</span>
+              <span className="text-xs text-gray-500 uppercase font-semibold">Execution Accuracy<InfoTip text="Percentage of completed jobs out of all terminal jobs (completed + failed). 100% means no failures." /></span>
               <div className="text-3xl font-extrabold text-brandPrimary font-montserrat">{successRate}%</div>
             </div>
           </div>
@@ -201,7 +210,7 @@ export const Metrics: React.FC = () => {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <RechartsTooltip />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -218,7 +227,7 @@ export const Metrics: React.FC = () => {
             {/* Throughput (Bar Chart) */}
             <div className="glass p-6 rounded-2xl border border-gray-800 lg:col-span-2 min-h-[350px]">
               <h3 className="text-lg font-bold text-white font-montserrat mb-4 flex justify-between">
-                <span>Hourly Throughput</span>
+                Hourly Throughput<InfoTip text="Number of jobs completed per hour for each queue. Higher throughput = faster job processing." />
                 <span className="text-xs text-brandSecondary uppercase self-center bg-brandSecondary/10 px-2.5 py-0.5 rounded border border-brandSecondary/20 font-semibold">
                   Jobs / Hour
                 </span>
@@ -229,7 +238,7 @@ export const Metrics: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" opacity={0.4} />
                     <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} />
                     <YAxis stroke="#6b7280" fontSize={12} tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
+                    <RechartsTooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
                     <Bar dataKey="Throughput" fill="#6366f1" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -240,7 +249,7 @@ export const Metrics: React.FC = () => {
           {/* Latency Plot */}
           <div className="glass p-6 rounded-2xl border border-gray-800">
             <h3 className="text-lg font-bold text-white font-montserrat mb-4 flex justify-between">
-              <span>Avg Queue Latency</span>
+                Avg Queue Latency<InfoTip text="Average time in milliseconds from when a job is claimed by a worker until it finishes execution." />
               <span className="text-xs text-brandPrimary uppercase self-center bg-brandPrimary/10 px-2.5 py-0.5 rounded border border-brandPrimary/20 font-semibold">
                 milliseconds
               </span>
@@ -257,7 +266,7 @@ export const Metrics: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" opacity={0.4} />
                   <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} />
                   <YAxis stroke="#6b7280" fontSize={12} tickLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
+                  <RechartsTooltip contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151' }} />
                   <Area type="monotone" dataKey="Latency" stroke="#a855f7" fillOpacity={1} fill="url(#colorLatency)" />
                 </AreaChart>
               </ResponsiveContainer>

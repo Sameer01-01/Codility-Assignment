@@ -206,7 +206,19 @@ export const JobExplorer: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-extrabold text-white font-montserrat tracking-tight">Job Explorer</h1>
-        <p className="text-gray-400 mt-1">Realtime pipeline execution, scheduling, logs, and failure triage</p>
+        <p className="text-gray-400 mt-1">Browse all jobs, watch real-time status updates, and inspect execution logs</p>
+      </div>
+
+      {/* Status Legend */}
+      <div className="glass px-5 py-3 rounded-xl border border-gray-800 flex flex-wrap items-center gap-4 text-xs">
+        <span className="text-gray-500 font-semibold uppercase text-[10px]">Status Guide:</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-gray-400"></span><span className="text-gray-300">Queued</span></span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-400"></span><span className="text-gray-300">Scheduled</span></span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-400"></span><span className="text-gray-300">Claimed</span></span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span><span className="text-gray-300">Running</span></span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400"></span><span className="text-gray-300">Completed</span></span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-rose-400"></span><span className="text-gray-300">Failed</span></span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400"></span><span className="text-gray-300">Dead Letter</span></span>
       </div>
 
       {/* Filter Toolbar */}
@@ -270,8 +282,9 @@ export const JobExplorer: React.FC = () => {
       ) : jobs.length === 0 ? (
         <div className="glass p-16 rounded-2xl text-center text-gray-400 border border-gray-800">
           <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-600 stroke-[1.5]" />
-          <h3 className="text-xl font-bold text-white mb-2">No jobs matched</h3>
-          <p>Submit jobs from the API to monitor them in the live console.</p>
+          <h3 className="text-xl font-bold text-white mb-2">No jobs found</h3>
+          <p className="mb-2">Jobs are submitted via the REST API and automatically picked up by workers.</p>
+          <p className="text-xs text-gray-500">Try submitting a job via <code className="text-brandPrimary">POST /jobs</code> with a queue ID and payload.</p>
         </div>
       ) : (
         <div className="glass rounded-2xl border border-gray-800 overflow-hidden">
@@ -426,7 +439,7 @@ export const JobExplorer: React.FC = () => {
 
               {/* Payload Viewer */}
               <div className="space-y-2">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Payload Payload</span>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Job Payload</span>
                 <pre className="bg-[#050811] border border-gray-850 p-4 rounded-xl text-xs text-brandSecondary overflow-x-auto font-mono">
                   {JSON.stringify(selectedJob.payload, null, 2)}
                 </pre>

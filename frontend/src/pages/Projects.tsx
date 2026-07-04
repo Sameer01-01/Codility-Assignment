@@ -80,7 +80,7 @@ export const Projects: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-extrabold text-white font-montserrat tracking-tight">Projects</h1>
-          <p className="text-gray-400 mt-1">Manage project-level configurations and scheduler pipelines</p>
+          <p className="text-gray-400 mt-1">Projects group your queues, jobs, and workers into isolated workspaces</p>
         </div>
         <button
           onClick={() => setIsCreating(true)}
@@ -154,8 +154,9 @@ export const Projects: React.FC = () => {
       ) : projects.length === 0 ? (
         <div className="glass p-16 rounded-2xl text-center text-gray-400 border border-gray-800">
           <Folder className="w-16 h-16 mx-auto mb-4 text-gray-600 stroke-[1.5]" />
-          <h3 className="text-xl font-bold text-white mb-2">No projects found</h3>
-          <p className="mb-6">Get started by creating your first scheduler workspace.</p>
+          <h3 className="text-xl font-bold text-white mb-2">No projects yet</h3>
+          <p className="mb-2 max-w-md mx-auto">A project is a workspace that groups your queues and jobs together. Create one to get started.</p>
+          <p className="text-xs text-gray-500 mb-6">Once created, you can set up queues inside it and start submitting jobs.</p>
           <button
             onClick={() => setIsCreating(true)}
             className="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors border border-gray-700"
